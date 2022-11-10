@@ -1,4 +1,4 @@
-import math
+import operator
 
 import matplotlib.pyplot as plt
 
@@ -7,7 +7,6 @@ letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.lower()
 encrypted_file = open("file.txt", "r")
 
 encrypted_Text = encrypted_file.read()
-
 
 
 relative_frequency = {
@@ -70,10 +69,44 @@ def frequency_ratio(dictionary):
     return cipher_frequency_ratio
 
 
-def expected_frequency(dictionary, total):
-    for element in dictionary:
-        dictionary[element] = math.floor(dictionary[element] * total / 100)
-    return dictionary
+def decrypt_cipher():
+    key = 1
+    brute_of_list = []
+    temporary = ""
+    while key != 26:
+        for letter in encrypted_Text:
+            if letter.isalpha():
+                index = letters.index(letter.lower())
+                if index - key >= 0:
+                    temporary += letters[index - key]
+                else:
+                    temporary += letters[25 + (index - key % 26)]
+        frequency = calculate_frequency(temporary)
+        rel_freq = frequency_ratio(frequency)
+        brute_of_list.append(rel_freq)
+        temporary = ""
+        key += 1
+    return brute_of_list
+
+
+def find_key(rel_freq_list):
+    differences = []
+    for element in rel_freq_list:
+        difference_list = list(map(operator.sub, element.values(), relative_freq.values()))
+        difference = 0
+        for number in difference_list:
+            difference += number
+        differences.append(difference)
+    indexes = []
+    while len(indexes) < 3:
+
+        if len(indexes) == 0:
+            indexes.append(differences.index(min(differences)) + 1)
+        if len(indexes) == 1:
+            indexes.append(differences.index(min(differences)) + 2)
+        else:
+            indexes.append(differences.index(min(differences)) + 3)
+    return indexes
 
 
 frequency_dict = calculate_frequency(encrypted_Text)
@@ -82,4 +115,18 @@ print(frequency_dict)
 relative_freq = frequency_ratio(frequency_dict)
 print(relative_freq)
 
+brute = decrypt_cipher()
+print(brute)
+
+print("Possible keys:", find_key(brute))
+
 draw_graph()
+
+
+
+
+
+
+
+
+
